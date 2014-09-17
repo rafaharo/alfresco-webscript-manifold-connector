@@ -46,7 +46,7 @@ public class AlfrescoConnector extends BaseRepositoryConnector {
 
   @Override
   public int getConnectorModel() {
-    return MODEL_ALL; // We will always return all specified documents.
+    return MODEL_ADD_CHANGE_DELETE; // We return only incremental documents.
   }
 
   void setClient(AlfrescoClient client) {
