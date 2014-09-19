@@ -1,12 +1,29 @@
-package org.alfresco.consulting.manifold;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.manifoldcf.crawler.connectors.alfresco.webscript.tests;
 
 import com.google.gson.Gson;
 
-import org.alfresco.consulting.indexer.client.AlfrescoClient;
-import org.alfresco.consulting.indexer.client.AlfrescoFilters;
-import org.alfresco.consulting.indexer.client.AlfrescoResponse;
 import org.apache.manifoldcf.agents.interfaces.RepositoryDocument;
 import org.apache.manifoldcf.core.interfaces.ManifoldCFException;
+import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.AlfrescoConnector;
+import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoClient;
+import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoFilters;
+import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoResponse;
 import org.apache.manifoldcf.crawler.interfaces.DocumentSpecification;
 import org.apache.manifoldcf.crawler.interfaces.IProcessActivity;
 import org.apache.manifoldcf.crawler.system.SeedingActivity;
