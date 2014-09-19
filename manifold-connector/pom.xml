@@ -36,25 +36,25 @@
       <dependency>
       	<groupId>${project.groupId}</groupId>
         <artifactId>mcf-core</artifactId>
-        <version>${mcf.version}</version>
+        <version>${project.version}</version>
       </dependency>
       
       <dependency>
       	<groupId>${project.groupId}</groupId>
      	<artifactId>mcf-pull-agent</artifactId>
-        <version>${mcf.version}</version>
+        <version>${project.version}</version>
       </dependency>
       
       <dependency>
       	<groupId>${project.groupId}</groupId>
         <artifactId>mcf-agents</artifactId>
-        <version>${mcf.version}</version>
+        <version>${project.version}</version>
       </dependency>
       
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>mcf-ui-core</artifactId>
-        <version>${mcf.version}</version>
+        <version>${project.version}</version>
       </dependency>
         
       <dependency>
