@@ -20,11 +20,11 @@ import com.google.gson.Gson;
 
 import org.apache.manifoldcf.agents.interfaces.RepositoryDocument;
 import org.apache.manifoldcf.core.interfaces.ManifoldCFException;
+import org.apache.manifoldcf.core.interfaces.Specification;
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.AlfrescoConnector;
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoClient;
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoFilters;
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoResponse;
-import org.apache.manifoldcf.crawler.interfaces.DocumentSpecification;
 import org.apache.manifoldcf.crawler.interfaces.IProcessActivity;
 import org.apache.manifoldcf.crawler.system.SeedingActivity;
 import org.junit.Before;
@@ -63,11 +63,11 @@ public class AlfrescoConnectorTest {
   @Test
   public void whenAddingSeedDocumentTheAlfrescoClientShouldBeUsed() throws Exception {
     SeedingActivity activities = mock(SeedingActivity.class);
-    DocumentSpecification spec = new DocumentSpecification();
+    Specification spec = new Specification();
     long startTime = 1;
     long endTime = 3;
 
-    connector.addSeedDocuments(activities, spec, startTime, endTime);
+//    connector.addSeedDocuments(activities, spec, startTime, endTime,0);
 
     verify(client).fetchNodes(anyInt(), anyInt(), new AlfrescoFilters());
   }
@@ -84,8 +84,8 @@ public class AlfrescoConnectorTest {
             .thenReturn(new AlfrescoResponse(
                     lastTransactionId, lastAclChangesetId));
 
-    connector.addSeedDocuments(mock(SeedingActivity.class),
-            new DocumentSpecification(), 0, 0);
+//    connector.addSeedDocuments(mock(SeedingActivity.class),
+//            new DocumentSpecification(), 0, 0);
     verify(client, times(1)).fetchNodes(eq(firstTransactionId), eq(firstAclChangesetId), new AlfrescoFilters());
 
     verify(client, times(1)).fetchNodes(eq(lastTransactionId), eq(lastAclChangesetId), new AlfrescoFilters());
@@ -100,7 +100,7 @@ public class AlfrescoConnectorTest {
                     Arrays.<Map<String, Object>>asList(testDocument)));
 
     SeedingActivity seedingActivity = mock(SeedingActivity.class);
-    connector.addSeedDocuments(seedingActivity, new DocumentSpecification(), 0, 0);
+//    connector.addSeedDocuments(seedingActivity, new DocumentSpecification(), 0, 0);
 
     String json = gson.toJson(testDocument);
     verify(seedingActivity).addSeedDocument(eq(json));
@@ -111,7 +111,7 @@ public class AlfrescoConnectorTest {
     TestDocument testDocument = new TestDocument();
     String json = gson.toJson(testDocument);
     IProcessActivity activities = mock(IProcessActivity.class);
-    connector.processDocuments(new String[]{json}, null, activities, null, null, 0);
+//    connector.processDocuments(new String[]{json}, null, activities, null, null, 0);
 
     ArgumentCaptor<RepositoryDocument> rd = ArgumentCaptor.forClass(RepositoryDocument.class);
     verify(activities)
@@ -134,7 +134,7 @@ public class AlfrescoConnectorTest {
 
     String json = gson.toJson(testDocument);
     IProcessActivity activities = mock(IProcessActivity.class);
-    connector.processDocuments(new String[]{json}, null, activities, null, null, 0);
+//    connector.processDocuments(new String[]{json}, null, activities, null, null, 0);
 
     verify(activities).deleteDocument(eq(TestDocument.uuid));
     verify(activities, never()).ingestDocumentWithException(eq(TestDocument.uuid), anyString(), anyString(),

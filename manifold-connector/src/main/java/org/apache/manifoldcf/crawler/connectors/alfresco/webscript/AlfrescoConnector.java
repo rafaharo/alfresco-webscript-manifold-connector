@@ -16,6 +16,7 @@
  */
 package org.apache.manifoldcf.crawler.connectors.alfresco.webscript;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -36,13 +37,12 @@ import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.Alfres
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoDownException;
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoResponse;
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.WebScriptsAlfrescoClient;
-import org.apache.manifoldcf.crawler.interfaces.DocumentSpecification;
+import org.apache.manifoldcf.crawler.interfaces.IExistingVersions;
 import org.apache.manifoldcf.crawler.interfaces.IProcessActivity;
 import org.apache.manifoldcf.crawler.interfaces.ISeedingActivity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.xml.messaging.saaj.util.ByteInputStream;
 
 public class AlfrescoConnector extends BaseRepositoryConnector {
   private static final Logger logger = LoggerFactory.getLogger(AlfrescoConnector.class);
@@ -65,7 +65,7 @@ public class AlfrescoConnector extends BaseRepositoryConnector {
     return MODEL_ADD_CHANGE_DELETE; // We return only incremental documents.
   }
 
-  void setClient(AlfrescoClient client) {
+  public void setClient(AlfrescoClient client) {
     alfrescoClient = client;
   }
 
@@ -168,14 +168,12 @@ public class AlfrescoConnector extends BaseRepositoryConnector {
   }
 
 @Override
-  public void processDocuments(String[] documentIdentifiers, String[] versions,
-                               IProcessActivity activities, DocumentSpecification spec,
-                               boolean[] scanOnly, int jobMode) throws ManifoldCFException,
-          ServiceInterruption {
-	int i = 0;  
+	public void processDocuments(String[] documentIdentifiers, IExistingVersions statuses, Specification spec,
+	    IProcessActivity activities, int jobMode, boolean usesDefaultAuthority)
+	    throws ManifoldCFException, ServiceInterruption{
     for (String doc : documentIdentifiers) {
     
-      String nextVersion = versions[i++];	
+      String nextVersion = statuses.getIndexedVersionString(doc);	
     	
       // Calling again Alfresco API because Document's actions are lost from seeding method
       AlfrescoResponse response = alfrescoClient.fetchNode(doc);
@@ -209,7 +207,7 @@ public class AlfrescoConnector extends BaseRepositoryConnector {
         try {
         	if(rd.getBinaryStream() == null){
         		byte[] empty = new byte[0];
-        		rd.setBinary(new ByteInputStream(empty, 0), 0L);
+        		rd.setBinary(new ByteArrayInputStream(empty), 0L);
         	}
         	logger.info("Ingesting with id: {}, URI {} and rd {}", uuid, nodeRef, rd.getFileName());
 			activities.ingestDocumentWithException(uuid, "", uuid, rd);
@@ -221,15 +219,6 @@ public class AlfrescoConnector extends BaseRepositoryConnector {
     }
   }
   
-  @Override
-  public String[] getDocumentVersions(String[] documentIdentifiers, DocumentSpecification spec)
-		    throws ManifoldCFException, ServiceInterruption{
-	  String[] versions = new String[documentIdentifiers.length];
-	  for(int i = 0; i < documentIdentifiers.length; i++)
-		  versions[i] = ConfigurationHandler.getSpecificationVersion(spec) + documentIdentifiers[i];
-	  return versions;
-  }
-
   private void processMetaData(RepositoryDocument rd,
 		  String uuid) throws ManifoldCFException, AlfrescoDownException {
     Map<String,Object> properties = alfrescoClient.fetchMetadata(uuid);

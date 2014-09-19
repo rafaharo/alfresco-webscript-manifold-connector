@@ -37,8 +37,6 @@ import org.apache.manifoldcf.core.interfaces.SpecificationNode;
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoFilters;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMultimap;
 
@@ -99,8 +97,6 @@ public class ConfigurationHandler {
     DEFAULT_CONFIGURATION_PARAMETERS.put(PARAM_PASSWORD, "");
   }
   
-  private static final Logger logger = LoggerFactory.getLogger(ConfigurationHandler.class);
-
   private ConfigurationHandler() {
   }
 
