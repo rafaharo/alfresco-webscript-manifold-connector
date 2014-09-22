@@ -1,4 +1,20 @@
-package org.alfresco.consulting.indexer.dao;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.manifoldcf.integration.alfresco.indexer.dao;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -7,21 +23,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.alfresco.consulting.indexer.entities.NodeBatchLoadEntity;
-import org.alfresco.consulting.indexer.entities.NodeEntity;
-import org.alfresco.consulting.indexer.utils.Utils;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.Path;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ibatis.session.RowBounds;
+import org.apache.manifoldcf.integration.alfresco.indexer.entities.NodeBatchLoadEntity;
+import org.apache.manifoldcf.integration.alfresco.indexer.entities.NodeEntity;
+import org.apache.manifoldcf.integration.alfresco.indexer.utils.Utils;
 import org.mybatis.spring.SqlSessionTemplate;
 
 public class IndexingDaoImpl
@@ -48,7 +63,8 @@ public class IndexingDaoImpl
     private Set<String> mimeTypes;
     private Set<String> sites;
 
-    public List<NodeEntity> getNodesByAclChangesetId(Pair<Long, StoreRef> store, Long lastAclChangesetId, int maxResults)
+    @SuppressWarnings("unchecked")
+	public List<NodeEntity> getNodesByAclChangesetId(Pair<Long, StoreRef> store, Long lastAclChangesetId, int maxResults)
     {
         StoreRef storeRef = store.getSecond();
         if (maxResults <= 0 || maxResults == Integer.MAX_VALUE)
@@ -74,7 +90,8 @@ public class IndexingDaoImpl
                 Integer.MAX_VALUE)));
     }
 
-    public List<NodeEntity> getNodesByTransactionId(Pair<Long, StoreRef> store, Long lastTransactionId, int maxResults)
+    @SuppressWarnings("unchecked")
+	public List<NodeEntity> getNodesByTransactionId(Pair<Long, StoreRef> store, Long lastTransactionId, int maxResults)
     {
         StoreRef storeRef = store.getSecond();
         if (maxResults <= 0 || maxResults == Integer.MAX_VALUE)

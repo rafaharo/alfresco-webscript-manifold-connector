@@ -1,10 +1,29 @@
-package org.alfresco.consulting.indexer.webscripts;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.manifoldcf.integration.alfresco.indexer.webscripts;
 
-import org.alfresco.consulting.indexer.dao.IndexingDaoImpl;
-import org.alfresco.consulting.indexer.entities.NodeEntity;
-
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.template.TemplateHashModel;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.repo.domain.node.NodeDAO;
@@ -12,16 +31,20 @@ import org.alfresco.repo.domain.qname.QNameDAO;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.util.Pair;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.manifoldcf.integration.alfresco.indexer.dao.IndexingDaoImpl;
+import org.apache.manifoldcf.integration.alfresco.indexer.entities.NodeEntity;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.springframework.extensions.webscripts.*;
+import org.springframework.extensions.webscripts.Cache;
+import org.springframework.extensions.webscripts.DeclarativeWebScript;
+import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.extensions.webscripts.WebScriptRequest;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.*;
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.template.TemplateHashModel;
 
 /**
  * Renders out a list of nodes (UUIDs) that have been changed in Alfresco; the changes can affect:
@@ -162,7 +185,8 @@ public class NodeChangesWebScript extends DeclarativeWebScript {
     return model;
   }
 
-  private void setIndexingFilters(JSONObject indexingParams)
+  @SuppressWarnings("unchecked")
+private void setIndexingFilters(JSONObject indexingParams)
   {
       
       //Reset filters
@@ -175,28 +199,28 @@ public class NodeChangesWebScript extends DeclarativeWebScript {
       List<String> types= (List<String>) indexingParams.get("typeFilters");
       
       if(types!=null && types.size()>0){
-          this.indexingService.setAllowedTypes(new HashSet(types));
+          this.indexingService.setAllowedTypes(new HashSet<String>(types));
       }
       
        //Site filter
        List<String> sites= (List<String>) indexingParams.get("siteFilters");
       
        if(sites!=null && sites.size()>0){
-           this.indexingService.setSites(new HashSet(sites));
+           this.indexingService.setSites(new HashSet<String>(sites));
        }
           
        //Mymetype filter
        List<String> mimetypes= (List<String>) indexingParams.get("mimetypeFilters");
        
        if(mimetypes!=null && mimetypes.size()>0){
-           this.indexingService.setMimeTypes(new HashSet(mimetypes));
+           this.indexingService.setMimeTypes(new HashSet<String>(mimetypes));
        }
           
        //Aspect filter
        List<String> aspects= (List<String>) indexingParams.get("aspectFilters");
        
        if(aspects!=null && aspects.size()>0){
-           this.indexingService.setAspects(new HashSet(aspects));
+           this.indexingService.setAspects(new HashSet<String>(aspects));
        }
           
        //Metadata filter

@@ -1,4 +1,4 @@
-package org.alfresco.consulting.indexer.webscripts;
+package org.apache.manifoldcf.integration.alfresco.indexer.tests;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.web.scripts.BaseWebScriptTest;
