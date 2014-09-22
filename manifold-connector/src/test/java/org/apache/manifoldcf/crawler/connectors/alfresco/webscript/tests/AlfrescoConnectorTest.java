@@ -20,11 +20,12 @@ import com.google.gson.Gson;
 
 import org.apache.manifoldcf.agents.interfaces.RepositoryDocument;
 import org.apache.manifoldcf.core.interfaces.ManifoldCFException;
+import org.apache.manifoldcf.core.interfaces.Specification;
+import org.apache.manifoldcf.crawler.connectors.BaseRepositoryConnector;
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.AlfrescoConnector;
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoClient;
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoFilters;
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoResponse;
-import org.apache.manifoldcf.crawler.interfaces.DocumentSpecification;
 import org.apache.manifoldcf.crawler.interfaces.IProcessActivity;
 import org.apache.manifoldcf.crawler.system.SeedingActivity;
 import org.junit.Before;
@@ -32,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.*;
@@ -48,14 +50,15 @@ public class AlfrescoConnectorTest {
 
   @Mock
   private AlfrescoClient client;
+ 
   private AlfrescoConnector connector;
-
+    
   @Before
   public void setup() throws Exception {
     connector = new AlfrescoConnector();
     connector.setClient(client);
 
-    when(client.fetchNodes(anyInt(), anyInt(), new AlfrescoFilters()))
+    when(client.fetchNodes(anyInt(), anyInt(), Mockito.any(AlfrescoFilters.class)))
             .thenReturn(new AlfrescoResponse(
                     0, 0, "", "", Collections.<Map<String, Object>>emptyList()));
   }
@@ -63,13 +66,12 @@ public class AlfrescoConnectorTest {
   @Test
   public void whenAddingSeedDocumentTheAlfrescoClientShouldBeUsed() throws Exception {
     SeedingActivity activities = mock(SeedingActivity.class);
-    DocumentSpecification spec = new DocumentSpecification();
-    long startTime = 1;
-    long endTime = 3;
+    Specification spec = new Specification();
+    long seedTime = 0;
+    
+    connector.addSeedDocuments(activities, spec, "", seedTime, BaseRepositoryConnector.JOBMODE_ONCEONLY);
 
-    connector.addSeedDocuments(activities, spec, startTime, endTime);
-
-    verify(client).fetchNodes(anyInt(), anyInt(), new AlfrescoFilters());
+    verify(client).fetchNodes(anyInt(), anyInt(),  Mockito.any(AlfrescoFilters.class));
   }
 
   @Test
@@ -80,38 +82,41 @@ public class AlfrescoConnectorTest {
     long firstAclChangesetId = 0;
     long lastAclChangesetId = 5;
 
-    when(client.fetchNodes(anyInt(), anyInt(), new AlfrescoFilters()))
+    when(client.fetchNodes(anyInt(), anyInt(), Mockito.any(AlfrescoFilters.class)))
             .thenReturn(new AlfrescoResponse(
                     lastTransactionId, lastAclChangesetId));
 
     connector.addSeedDocuments(mock(SeedingActivity.class),
-            new DocumentSpecification(), 0, 0);
-    verify(client, times(1)).fetchNodes(eq(firstTransactionId), eq(firstAclChangesetId), new AlfrescoFilters());
+            new Specification(), "", 0, BaseRepositoryConnector.JOBMODE_ONCEONLY);
+    verify(client, times(1)).fetchNodes(eq(firstTransactionId), eq(firstAclChangesetId), Mockito.any(AlfrescoFilters.class));
 
-    verify(client, times(1)).fetchNodes(eq(lastTransactionId), eq(lastAclChangesetId), new AlfrescoFilters());
+    verify(client, times(1)).fetchNodes(eq(lastTransactionId), eq(lastAclChangesetId), Mockito.any(AlfrescoFilters.class));
   }
 
-  @SuppressWarnings("unchecked")
+  
   @Test
   public void whenADocumentIsReturnedItShouldBeAddedToManifold() throws Exception {
     TestDocument testDocument = new TestDocument();
-    when(client.fetchNodes(anyInt(), anyInt(), new AlfrescoFilters()))
+    when(client.fetchNodes(anyInt(), anyInt(), Mockito.any(AlfrescoFilters.class)))
             .thenReturn(new AlfrescoResponse(0, 0, "", "",
                     Arrays.<Map<String, Object>>asList(testDocument)));
 
     SeedingActivity seedingActivity = mock(SeedingActivity.class);
-    connector.addSeedDocuments(seedingActivity, new DocumentSpecification(), 0, 0);
+    connector.addSeedDocuments(seedingActivity, new Specification(), "", 0, BaseRepositoryConnector.JOBMODE_ONCEONLY);
 
-    String json = gson.toJson(testDocument);
-    verify(seedingActivity).addSeedDocument(eq(json));
+    verify(seedingActivity).addSeedDocument(eq(TestDocument.uuid));
   }
 
   @Test
   public void whenProcessingDocumentsNodeRefsAreUsedAsDocumentURI() throws Exception {
     TestDocument testDocument = new TestDocument();
-    String json = gson.toJson(testDocument);
     IProcessActivity activities = mock(IProcessActivity.class);
-    connector.processDocuments(new String[]{json}, null, activities, null, null, 0);
+    
+    when(client.fetchNode(anyString()))
+    .thenReturn(new AlfrescoResponse(0, 0, "", "",
+            Arrays.<Map<String, Object>>asList(testDocument)));
+    
+    connector.processDocuments(new String[]{TestDocument.uuid}, new String[]{""}, activities, null, null, 0);
 
     ArgumentCaptor<RepositoryDocument> rd = ArgumentCaptor.forClass(RepositoryDocument.class);
     verify(activities)
@@ -132,9 +137,12 @@ public class AlfrescoConnectorTest {
     TestDocument testDocument = new TestDocument();
     testDocument.setDeleted(true);
 
-    String json = gson.toJson(testDocument);
+    when(client.fetchNode(anyString()))
+    .thenReturn(new AlfrescoResponse(0, 0, "", "",
+            Arrays.<Map<String, Object>>asList(testDocument)));
+    
     IProcessActivity activities = mock(IProcessActivity.class);
-    connector.processDocuments(new String[]{json}, null, activities, null, null, 0);
+    connector.processDocuments(new String[]{TestDocument.uuid}, new String[]{""}, activities, null, null, 0);
 
     verify(activities).deleteDocument(eq(TestDocument.uuid));
     verify(activities, never()).ingestDocumentWithException(eq(TestDocument.uuid), anyString(), anyString(),
@@ -146,9 +154,11 @@ public class AlfrescoConnectorTest {
   private class TestDocument extends HashMap<String, Object> {
     static final String uuid = "abc123";
     static final String type = "cm:content";
+    static final String nodeRef = "workspace://abc123";
     static final boolean deleted = false;
     static final String storeId = "SpacesStore";
     static final String storeProtocol = "workspace";
+    static final String name = "test";
 
     public TestDocument() {
       super();
@@ -157,6 +167,8 @@ public class AlfrescoConnectorTest {
       put("deleted", deleted);
       put("store_id", storeId);
       put("store_protocol", storeProtocol);
+      put("nodeRef", nodeRef);
+      put("name", name);
     }
 
     public void setDeleted(boolean deleted) {

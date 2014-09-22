@@ -84,6 +84,15 @@ public class AlfrescoFilters {
 		metadataFilters.put(metadata, value);
 	}
 	
+	public boolean isEmpty(){
+		return siteFilters.isEmpty() &&
+				typeFilters.isEmpty() &&
+				mimetypeFilters.isEmpty() &&
+				aspectFilters.isEmpty() &&
+				metadataFilters.isEmpty();
+				
+	}
+	
 	public  String toJSONString(){
 	    
 	    Gson gson= new GsonBuilder().create();

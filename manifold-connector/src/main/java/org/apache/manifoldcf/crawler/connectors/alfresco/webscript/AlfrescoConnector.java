@@ -16,6 +16,7 @@
  */
 package org.apache.manifoldcf.crawler.connectors.alfresco.webscript;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -42,7 +43,6 @@ import org.apache.manifoldcf.crawler.interfaces.ISeedingActivity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.xml.messaging.saaj.util.ByteInputStream;
 
 public class AlfrescoConnector extends BaseRepositoryConnector {
   private static final Logger logger = LoggerFactory.getLogger(AlfrescoConnector.class);
@@ -65,7 +65,7 @@ public class AlfrescoConnector extends BaseRepositoryConnector {
     return MODEL_ADD_CHANGE_DELETE; // We return only incremental documents.
   }
 
-  void setClient(AlfrescoClient client) {
+  public void setClient(AlfrescoClient client) {
     alfrescoClient = client;
   }
 
@@ -186,12 +186,12 @@ public class AlfrescoConnector extends BaseRepositoryConnector {
       }
       Map<String, Object> map = response.getDocumentList().get(0); // Should be only one
       RepositoryDocument rd = new RepositoryDocument();
-      String uuid = map.get(FIELD_UUID).toString();
-      String nodeRef = map.get(FIELD_NODEREF).toString();
+      String uuid = map.containsKey(FIELD_UUID) ? map.get(FIELD_UUID).toString() : doc;
+      String nodeRef = map.containsKey(FIELD_NODEREF) ? map.get(FIELD_NODEREF).toString() : "";
       rd.addField(FIELD_NODEREF, nodeRef);
-      String type = map.get(FIELD_TYPE).toString();
+      String type = map.containsKey(FIELD_TYPE) ? map.get(FIELD_TYPE).toString() : "";
       rd.addField(FIELD_TYPE, type);
-      String name = map.get(FIELD_NAME).toString();
+      String name =  map.containsKey(FIELD_NAME) ? map.get(FIELD_NAME).toString() : "";
       rd.setFileName(name);
 
       if ((Boolean) map.get("deleted")) {
@@ -209,7 +209,7 @@ public class AlfrescoConnector extends BaseRepositoryConnector {
         try {
         	if(rd.getBinaryStream() == null){
         		byte[] empty = new byte[0];
-        		rd.setBinary(new ByteInputStream(empty, 0), 0L);
+        		rd.setBinary(new ByteArrayInputStream(empty), 0L);
         	}
         	logger.info("Ingesting with id: {}, URI {} and rd {}", uuid, nodeRef, rd.getFileName());
 			activities.ingestDocumentWithException(uuid, "", uuid, rd);
@@ -249,8 +249,10 @@ public class AlfrescoConnector extends BaseRepositoryConnector {
     // Indexing Permissions
     @SuppressWarnings("unchecked")
 	List<String> permissions = (List<String>) properties.remove(AUTHORITIES_PROPERTY);
-    rd.setSecurityACL(RepositoryDocument.SECURITY_TYPE_DOCUMENT,
+    if(permissions != null){
+    	rd.setSecurityACL(RepositoryDocument.SECURITY_TYPE_DOCUMENT,
     		permissions.toArray(new String[permissions.size()]));
+    }
   }
 
   @Override

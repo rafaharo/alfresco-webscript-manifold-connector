@@ -37,8 +37,6 @@ import org.apache.manifoldcf.core.interfaces.SpecificationNode;
 import org.apache.manifoldcf.crawler.connectors.alfresco.webscript.client.AlfrescoFilters;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMultimap;
 
@@ -98,8 +96,6 @@ public class ConfigurationHandler {
     DEFAULT_CONFIGURATION_PARAMETERS.put(PARAM_USERNAME, "");
     DEFAULT_CONFIGURATION_PARAMETERS.put(PARAM_PASSWORD, "");
   }
-  
-  private static final Logger logger = LoggerFactory.getLogger(ConfigurationHandler.class);
 
   private ConfigurationHandler() {
   }
@@ -108,7 +104,7 @@ public class ConfigurationHandler {
       IHTTPOutput out, Locale locale, ConfigParams parameters,
       List<String> tabsArray) throws ManifoldCFException, IOException {
     tabsArray.add("Server");
-    InputStream inputStream = ConfigurationHandler.class.getResourceAsStream("/org/alfresco/consulting/manifold/" + EDIT_CONFIG_HEADER);
+    InputStream inputStream = ConfigurationHandler.class.getResourceAsStream("/org/apache/manifoldcf/crawler/connectors/alfresco/webscript/" + EDIT_CONFIG_HEADER);
     StringWriter writer = new StringWriter();
     IOUtils.copy(inputStream, writer, "UTF-8");
     inputStream.close();

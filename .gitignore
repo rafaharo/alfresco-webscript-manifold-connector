@@ -10,3 +10,4 @@ target
 *.log
 *.log.*
 alf_data_dev
+org.eclipse.jdt.ui.prefs

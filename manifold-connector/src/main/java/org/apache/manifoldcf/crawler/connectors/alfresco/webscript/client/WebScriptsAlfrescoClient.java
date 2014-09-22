@@ -141,23 +141,28 @@ private HttpGet createGetRequest(String url) {
 
   private String urlParameters(long lastTransactionId, long lastAclChangesetId, AlfrescoFilters filters) {
     
-      
-      String indexingFilters=null;
-      try
-      {
-          indexingFilters = URLEncoder.encode(filters.toJSONString(),"UTF-8");
-      }
-      catch (UnsupportedEncodingException e)
-      {
-          indexingFilters= filters.toJSONString();
-      }
-      
-      String urlParameters = String.format("%s=%d&%s=%d&%s=%s",
-    		URL_PARAM_LAST_TXN_ID, lastTransactionId,
-    		URL_PARAM_LAST_ACL_CS_ID, lastAclChangesetId,
-    		URL_PARAM_INDEXING_FILTERS, indexingFilters);
+	  String urlParameters = null;
+	  if(filters != null && !filters.isEmpty()){
+		  String indexingFilters=null;
+		  try
+		  {
+			  indexingFilters = URLEncoder.encode(filters.toJSONString(),"UTF-8");
+		  }
+		  catch (UnsupportedEncodingException e)
+		  {
+			  indexingFilters= filters.toJSONString();
+		  }
 
-		return urlParameters;
+		  urlParameters = String.format("%s=%d&%s=%d&%s=%s",
+				  URL_PARAM_LAST_TXN_ID, lastTransactionId,
+				  URL_PARAM_LAST_ACL_CS_ID, lastAclChangesetId,
+				  URL_PARAM_INDEXING_FILTERS, indexingFilters);
+	  }else
+		  urlParameters = String.format("%s=%d&%s=%d",
+				  URL_PARAM_LAST_TXN_ID, lastTransactionId,
+				  URL_PARAM_LAST_ACL_CS_ID, lastAclChangesetId);
+
+	  return urlParameters;
   }
 
   private AlfrescoResponse fromHttpEntity(HttpEntity entity) throws IOException {
